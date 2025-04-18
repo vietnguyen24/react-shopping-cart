@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
 
 import Loader from 'components/Loader';
-import { GithubCorner, GithubStarButton } from 'components/Github';
-import Recruiter from 'components/Recruiter';
+import { GithubCorner } from 'components/Github';
 import Filter from 'components/Filter';
 import Products from 'components/Products';
 import Cart from 'components/Cart';
@@ -22,11 +21,9 @@ function App() {
     <S.Container>
       {isFetching && <Loader />}
       <GithubCorner />
-      <Recruiter />
       <S.TwoColumnGrid>
         <S.Side>
           <Filter />
-          <GithubStarButton />
         </S.Side>
         <S.Main>
           <S.MainHeader>
