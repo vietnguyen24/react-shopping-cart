@@ -4,22 +4,45 @@ import CartProducts from './CartProducts';
 import { useCart } from 'contexts/cart-context';
 import {useUserContext } from 'contexts/user-context/UserContext'
 import * as S from './style';
+import axios from 'axios';
 
 const Cart = () => {
   const { tokenId } = useUserContext();
   const { products, total, isOpen, openCart, closeCart } = useCart();
 
-  const handleCheckout = () => {
-    if (total.productQuantity) {
-      alert(
-        `Checkout - Subtotal: ${total.currencyFormat} ${formatPrice(
-          total.totalPrice,
-          total.currencyId
-        )}`
-      );
-    } else {
-      alert('Add some product in the cart!');
+  const postOrder = async () => {
+    const url = `${process.env.REACT_APP_API_GATEWAY_ORIGIN}/orders`;
+    const headers = {
+      'Authorization': `Bearer ${tokenId}`,
+      'Content-Type': 'application/json',
+    };
+    const body = {};
+
+    try {
+      return axios.post(url, body, { headers });
+    } catch (error) {
+      console.error('Error posting order:', error);
+      throw error;
     }
+  }
+
+  const handleCheckout = () => {
+    if (!total.productQuantity) {
+      alert('Add some product in the cart!');
+      return;
+    }
+
+    postOrder()
+    .then((response) => {
+      const orderId = response.data.orderId;
+      console.log('Order posted successfully:', response);
+      alert('Order placed successfully with ORDER ID:  ' + orderId);
+    })
+    .catch((error) => {
+      console.error('Error posting order:', error);
+      alert('Error posting order');
+    });
+
   };
 
   const getCognitoLogoutUrl = () => {
@@ -94,7 +117,7 @@ const Cart = () => {
               Logout
             </S.LogoutButton>
           </S.CartFooter>
-          
+
         </S.CartContent>
       )}
     </S.Container>
