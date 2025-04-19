@@ -10,9 +10,9 @@ const Cart = () => {
     window.location.href = loginUrl; //
   };
   const getCognitoLoginUrl = () => {
-    const domain = 'us-east-2st4razho3.auth.us-east-2.amazoncognito.com'; // Replace
-    const clientId = '79cpf3l8hvreoksom87g2293bi'; // Replace
-    const redirectUri = encodeURIComponent('http://localhost:3000/callback'); // Your callback URL
+    const domain = process.env.REACT_APP_COGNITO_DOMAIN;
+    const clientId = process.env.REACT_APP_COGNITO_CLIENT_ID;
+    const redirectUri = encodeURIComponent(process.env.REACT_APP_COGNITO_LOGIN_REDIRECT_URI ?? (() => { throw new Error("REACT_APP_COGNITO_LOGIN_REDIRECT_URI is not defined"); })());
     const responseType = 'token'; // Use 'token' for Implicit Grant, 'code' for Auth Code Grant
     const scope = 'email+openid+phone'; // Adjust scopes
 

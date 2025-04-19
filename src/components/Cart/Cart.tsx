@@ -6,6 +6,7 @@ import {useUserContext } from 'contexts/user-context/UserContext'
 import * as S from './style';
 
 const Cart = () => {
+  const { tokenId } = useUserContext();
   const { products, total, isOpen, openCart, closeCart } = useCart();
 
   const handleCheckout = () => {
@@ -22,9 +23,9 @@ const Cart = () => {
   };
 
   const getCognitoLogoutUrl = () => {
-    const domain = 'us-east-2st4razho3.auth.us-east-2.amazoncognito.com'; // Replace
-    const clientId = '79cpf3l8hvreoksom87g2293bi'; // Replace
-    const redirectUri = encodeURIComponent('http://localhost:3000'); // Your callback URL
+    const domain = process.env.REACT_APP_COGNITO_DOMAIN;
+    const clientId = process.env.REACT_APP_COGNITO_CLIENT_ID;
+    const redirectUri = encodeURIComponent(process.env.REACT_APP_COGNITO_LOGOUT_REDIRECT_URI || '');
 
     return `https://${domain}/logout?client_id=${clientId}&logout_uri=${redirectUri}`;
   }
