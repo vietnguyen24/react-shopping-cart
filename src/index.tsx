@@ -11,6 +11,7 @@ import { ProductsProvider } from 'contexts/products-context';
 import { CartProvider } from 'contexts/cart-context';
 
 import App from 'components/App';
+import { UserProvider } from 'contexts/user-context/UserContext';
 
 const root = document.getElementById('root')!;
 const container = ReactDOMClient.createRoot(root);
@@ -21,7 +22,9 @@ container.render(
       <GlobalStyle />
       <ProductsProvider>
         <CartProvider>
+          <UserProvider>
           <App />
+          </UserProvider>
         </CartProvider>
       </ProductsProvider>
     </ThemeProvider>
