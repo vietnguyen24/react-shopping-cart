@@ -1,8 +1,11 @@
+import { useEffect } from 'react';
 import formatPrice from 'utils/formatPrice';
 import CartProducts from './CartProducts';
+import Loader from 'components/Loader';
 
 import { useCart } from 'contexts/cart-context';
-import {useUserContext } from 'contexts/user-context/UserContext'
+import { useCartContext } from 'contexts/cart-context/CartContextProvider';
+import { useUserContext } from 'contexts/user-context/UserContext';
 import * as S from './style';
 import axios from 'axios';
 
@@ -25,6 +28,14 @@ const Cart = () => {
       throw error;
     }
   }
+  const { isLoading, error, fetchCartItems } = useCartContext();
+
+  // Fetch cart items when cart is opened or tokenId changes
+  useEffect(() => {
+    if (isOpen && tokenId) {
+      fetchCartItems();
+    }
+  }, [isOpen, tokenId, fetchCartItems]);
 
   const handleCheckout = () => {
     if (!total.productQuantity) {
@@ -57,15 +68,13 @@ const Cart = () => {
     localStorage.removeItem('id_token');
     localStorage.removeItem('access_token');
     const logoutUrl = getCognitoLogoutUrl();
-    window.location.href = logoutUrl; //
-
+    window.location.href = logoutUrl;
   }
 
   const handleToggleCart = (isOpen: boolean) => () =>
     isOpen ? closeCart() : openCart();
 
   return (
-
     <S.Container isOpen={isOpen}>
       <S.CartButton onClick={handleToggleCart(isOpen)}>
         {isOpen ? (
@@ -88,7 +97,30 @@ const Cart = () => {
             <S.HeaderTitle>Cart</S.HeaderTitle>
           </S.CartContentHeader>
 
-          <CartProducts products={products} />
+          {isLoading ? (
+            <div style={{ position: 'relative', height: '200px' }}>
+              <Loader />
+            </div>
+          ) : error ? (
+            <div style={{ padding: '20px', textAlign: 'center', color: '#fff' }}>
+              {error}
+              <button 
+                onClick={() => fetchCartItems()} 
+                style={{ 
+                  marginTop: '10px', 
+                  padding: '5px 10px', 
+                  background: '#0c0b10', 
+                  color: '#fff', 
+                  border: 'none', 
+                  cursor: 'pointer' 
+                }}
+              >
+                Try Again
+              </button>
+            </div>
+          ) : (
+            <CartProducts products={products} />
+          )}
 
           <S.CartFooter>
             <S.Sub>SUBTOTAL</S.Sub>
@@ -110,10 +142,13 @@ const Cart = () => {
                 ) : null}
               </S.SubPriceInstallment>
             </S.SubPrice>
-            <S.CheckoutButton onClick={handleCheckout} autoFocus>
+            <S.CheckoutButton 
+              onClick={handleCheckout} 
+              disabled={isLoading || products.length === 0}
+            >
               Checkout
             </S.CheckoutButton>
-            <S.LogoutButton onClick={handleLogout} autoFocus>
+            <S.LogoutButton onClick={handleLogout}>
               Logout
             </S.LogoutButton>
           </S.CartFooter>
