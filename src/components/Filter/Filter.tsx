@@ -36,7 +36,7 @@ const Filter = () => {
     <S.Checkbox label={label} handleOnChange={toggleCheckbox} key={label} />
   );
 
-  const createCheckboxes = () => categories.map(createCheckbox);
+  const createCheckboxes = () => categories? categories.map(createCheckbox): '';
 
   return (
     <S.Container>
