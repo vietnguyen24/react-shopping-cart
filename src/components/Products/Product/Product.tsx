@@ -18,6 +18,7 @@ const Product = ({ product }: IProps) => {
     product_id,
     name,
     price,
+    image
   } = product;
 
 
@@ -34,7 +35,7 @@ const Product = ({ product }: IProps) => {
   };
 
   return (
-    <S.Container onKeyUp={handleAddProductWhenEnter} sku={product_id} tabIndex={1}>
+    <S.Container onKeyUp={handleAddProductWhenEnter} image={image} tabIndex={1}>
       <S.Image alt={name} />
       <S.Title>{name}</S.Title>
       <S.Price>
