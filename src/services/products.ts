@@ -1,20 +1,24 @@
 import axios from 'axios';
 import { IGetProductsResponse } from 'models';
 
-const isProduction = process.env.NODE_ENV === 'production';
 
-export const getProducts = async () => {
-  let response: IGetProductsResponse;
-
-  if (isProduction) {
-    response = await axios.get(
-      'https://react-shopping-cart-67954.firebaseio.com/products.json'
-    );
-  } else {
-    response = require('static/json/products.json');
+export const getProducts = async (categories:string[] = []) => {
+  try {
+    const res = await axios.get(`${process.env.REACT_APP_API_GATEWAY_ORIGIN}/products/${generateParams(categories)}`)
+    console.log("products:", res.data.body)
+    return res.data.body
+  } catch(err) {
+    console.log(err)
+    return []
   }
+}
 
-  const { products } = response.data || [];
 
-  return products;
-};
+const generateParams = (categories:string[]) => {
+  if (categories.length === 0){
+    return ""
+  }
+  return `?category=${categories.join(',')}`
+  
+}
+

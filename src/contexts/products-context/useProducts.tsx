@@ -25,22 +25,10 @@ const useProducts = () => {
   const filterProducts = (filters: string[]) => {
     setIsFetching(true);
 
-    getProducts().then((products: IProduct[]) => {
+    getProducts(filters).then((products: IProduct[]) => {
       setIsFetching(false);
-      let filteredProducts;
-
-      if (filters && filters.length > 0) {
-        filteredProducts = products.filter((p: IProduct) =>
-          filters.find((filter: string) =>
-            p.availableSizes.find((size: string) => size === filter)
-          )
-        );
-      } else {
-        filteredProducts = products;
-      }
-
       setFilters(filters);
-      setProducts(filteredProducts);
+      setProducts(products);
     });
   };
 
