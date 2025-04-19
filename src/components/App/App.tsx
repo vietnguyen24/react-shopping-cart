@@ -1,39 +1,19 @@
-import { useEffect } from 'react';
+import React from 'react';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 
-import Loader from 'components/Loader';
-import { GithubCorner } from 'components/Github';
-import Filter from 'components/Filter';
-import Products from 'components/Products';
-import Cart from 'components/Cart';
-
-import { useProducts } from 'contexts/products-context';
-
-import * as S from './style';
+import AuthCallback from '../AuthCallback'; 
+import Main from 'components/Main';
 
 function App() {
-  const { isFetching, products, fetchProducts } = useProducts();
-
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
 
   return (
-    <S.Container>
-      {isFetching && <Loader />}
-      <GithubCorner />
-      <S.TwoColumnGrid>
-        <S.Side>
-          <Filter />
-        </S.Side>
-        <S.Main>
-          <S.MainHeader>
-            <p>{products?.length} Product(s) found</p>
-          </S.MainHeader>
-          <Products products={products} />
-        </S.Main>
-      </S.TwoColumnGrid>
-      <Cart />
-    </S.Container>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Main />} />
+        {/* This is the route that handles the redirect from Cognito */}
+        <Route path="/callback" element={<AuthCallback />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

@@ -169,28 +169,6 @@ export const CheckoutButton = styled.button`
     background-color: #000;
   }
 `;
-export const LogoutButton = styled.button`
-  width: 100%;
-  border: 0;
-  color: #ececec;
-  text-transform: uppercase;
-  background-color: #0c0b10;
-  text-align: center;
-  padding: 15px 0;
-  margin-top: 20px; /* Adjust margin to create spacing below the CheckoutButton */
-  cursor: pointer;
-  outline: none;
-
-  transition: background-color 0.2s;
-
-  &:focus-visible {
-    outline: 3px solid ${({ theme }) => theme.colors.secondary};
-  }
-
-  &:hover {
-    background-color: #000;
-  }
-`;
 
 export const CartFooter = styled.div`
   box-sizing: border-box;
@@ -198,7 +176,7 @@ export const CartFooter = styled.div`
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: 250px;
+  height: 200px;
   z-index: 2;
   background-color: ${({ theme }) => theme.colors.primary};
 
