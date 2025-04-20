@@ -36,7 +36,7 @@ const Cart = () => {
   // Only fetch if the hasLoadedData flag in CartContextProvider wasn't able to handle it
   // This provides a backup fetch mechanism if needed (e.g., after error conditions or special cases)
   useEffect(() => {
-    // Only consider fetching if the cart is open and we have a token
+    // Only fetch if the cart is open, we have a token, we need a manual fetch, and hasLoadedData is false
     if (isOpen && tokenId && needsManualFetch.current) {
       fetchCartItems();
       needsManualFetch.current = false;

@@ -1,4 +1,4 @@
-import { createContext, useContext, FC, useState, useEffect, useRef } from 'react';
+import { createContext, useContext, FC, useState, useEffect, useRef, useMemo } from 'react';
 import { ICartProduct, ICartTotal } from 'models';
 import axios from 'axios';
 import { useUserContext } from 'contexts/user-context/UserContext';
@@ -9,7 +9,7 @@ export interface ICartContext {
   products: ICartProduct[];
   setProducts(products: ICartProduct[]): void;
   total: ICartTotal;
-  setTotal(products: any): void;
+  setTotal(total: ICartTotal): void;
   isLoading: boolean;
   error: string | null;
   fetchCartItems(): Promise<void>;
@@ -41,20 +41,63 @@ const CartProvider: FC = (props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const hasLoadedData = useRef(false);
-  
+
   // Get user context
   const userContext = useUserContext();
   const tokenId = userContext ? userContext.tokenId : null;
-  
+
+  // Update cart total whenever products change
+  useEffect(() => {
+    updateCartTotal(products);
+  }, [products]);
+
+  // Fetch cart data when user logs in (tokenId becomes available)
+  useEffect(() => {
+    // Only fetch if we have a tokenId and haven't already loaded data
+    if (tokenId && !hasLoadedData.current) {
+      fetchCartItems();
+    }
+    // If tokenId is removed (user logs out), reset the flag
+    if (!tokenId) {
+      hasLoadedData.current = false;
+      setProducts([]); // Clear products when user logs out
+    }
+  }, [tokenId]);
+
+  // Calculate cart totals based on current products
+  const updateCartTotal = (cartProducts: ICartProduct[]) => {
+    const productQuantity = cartProducts.reduce(
+      (sum, product) => sum + product.quantity,
+      0
+    );
+    
+    const totalPrice = cartProducts.reduce(
+      (sum, product) => sum + product.price * product.quantity,
+      0
+    );
+    
+    // Find the highest installment available
+    const installments = 0
+    
+    setTotal({
+      productQuantity,
+      installments,
+      totalPrice,
+      currencyId: 'USD',
+      currencyFormat: '$',
+    });
+  };
+
   const fetchCartItems = async (): Promise<void> => {
     if (!tokenId) {
       return;
     }
-    
+
     setIsLoading(true);
     setError(null);
-    
+
     try {
+      console.log('Fetching cart items...');
       const response = await axios.get(
         `${process.env.REACT_APP_API_GATEWAY_ORIGIN}/carts`,
         {
@@ -63,7 +106,7 @@ const CartProvider: FC = (props) => {
           }
         }
       );
-      
+
       // Check if we have a response with a structure {items: [], message: ""}
       if (response.data && 'items' in response.data) {
         // Check if there's an empty cart message
@@ -74,20 +117,20 @@ const CartProvider: FC = (props) => {
         } else {
           // We have items, process them
           const cartItems: ICartProduct[] = response.data.items.map((item: any) => ({
-            product_id: item.productId,
-            name: item.name || 'Product',
+            product_id: item.product_id,
+            name: item.product_name || 'Product',
             price: item.price || 0,
             quantity: item.quantity || 1,
-            description: item.description || '',
-            category: item.category || '',
-            image: item.image || ''
+            image: item.product_image || ''
           }));
-          
+
           setProducts(cartItems);
+          // updateCartTotal is now called automatically via useEffect
           setError(null);
         }
-        
+
         hasLoadedData.current = true;
+        console.log('Cart data loaded successfully');
       } else {
         // Handle unexpected response format
         console.error('Unexpected API response format:', response.data);
@@ -95,10 +138,10 @@ const CartProvider: FC = (props) => {
       }
     } catch (err) {
       console.error('Error fetching cart items:', err);
-      
+
       // Check if this is a 404 "cart is empty" response
-      if (axios.isAxiosError(err) && err.response?.status === 404 && 
-          err.response?.data?.message) {
+      if (axios.isAxiosError(err) && err.response?.status === 404 &&
+        err.response?.data?.message) {
         setProducts([]);
         // You could set the error to display the message from the backend
         setError(err.response.data.message);
@@ -110,7 +153,7 @@ const CartProvider: FC = (props) => {
       setIsLoading(false);
     }
   };
-  
+
   // Custom setIsOpen that also triggers data fetching when cart is opened
   const customSetIsOpen = (newIsOpen: boolean) => {
     // If opening the cart and we haven't loaded data yet, fetch cart items
@@ -119,7 +162,7 @@ const CartProvider: FC = (props) => {
     }
     setIsOpen(newIsOpen);
   };
-  
+
   // Resets the hasLoadedData flag when tokenId changes
   useEffect(() => {
     hasLoadedData.current = false;

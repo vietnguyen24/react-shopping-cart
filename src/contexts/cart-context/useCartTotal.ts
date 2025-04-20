@@ -22,6 +22,7 @@ const useCartTotal = () => {
     const total = {
       productQuantity,
       totalPrice,
+      installments: 0, // Assuming you want to set this to 0 for now
       currencyId: 'USD',
       currencyFormat: '$',
     };
