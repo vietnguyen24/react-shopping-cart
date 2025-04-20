@@ -1,6 +1,7 @@
 import { createContext, useContext, FC, useState, useEffect, useRef, useMemo } from 'react';
 import { ICartProduct, ICartTotal } from 'models';
-import axios from 'axios';
+import apiClient from 'utils/apiClient';
+import axios from 'axios'; // Keep this import for isAxiosError
 import { useUserContext } from 'contexts/user-context/UserContext';
 
 export interface ICartContext {
@@ -98,14 +99,8 @@ const CartProvider: FC = (props) => {
 
     try {
       console.log('Fetching cart items...');
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_GATEWAY_ORIGIN}/carts`,
-        {
-          headers: {
-            Authorization: `Bearer ${tokenId}`
-          }
-        }
-      );
+      // Use apiClient instead of axios - no need to specify Authorization header
+      const response = await apiClient.get('/carts');
 
       // Check if we have a response with a structure {items: [], message: ""}
       if (response.data && 'items' in response.data) {
@@ -136,17 +131,16 @@ const CartProvider: FC = (props) => {
         console.error('Unexpected API response format:', response.data);
         setError('Received an unexpected response format from the server.');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching cart items:', err);
 
-      // Check if this is a 404 "cart is empty" response
-      if (axios.isAxiosError(err) && err.response?.status === 404 &&
-        err.response?.data?.message) {
+      // For 404 errors which might be "cart is empty" responses
+      if (err?.response?.status === 404 && err?.response?.data?.message) {
         setProducts([]);
-        // You could set the error to display the message from the backend
         setError(err.response.data.message);
         hasLoadedData.current = true;
-      } else {
+      } else if (err?.message !== 'Token expired') {
+        // Only set error if it's not a token expiration (which is handled by apiClient)
         setError('Failed to load your cart items. Please try again later.');
       }
     } finally {

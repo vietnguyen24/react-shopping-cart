@@ -67,8 +67,14 @@ function AuthCallback() {
       // Clear the hash from the URL for cleanliness and security
       window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
 
-      // Redirect user to the main application area
-      navigate('/'); // Or desired post-login route
+      // Check if there's a redirect URL saved from before login
+      const redirectUrl = localStorage.getItem('auth_redirect_url');
+      if (redirectUrl) {
+        localStorage.removeItem('auth_redirect_url'); // Clean up
+        navigate(redirectUrl); // Navigate back to the page they were trying to access
+      } else {
+        navigate('/'); // Default redirect
+      }
 
       return; // Successfully handled implicit grant
     }

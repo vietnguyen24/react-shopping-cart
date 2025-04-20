@@ -2,7 +2,7 @@ import formatPrice from 'utils/formatPrice';
 import { ICartProduct } from 'models';
 import { useCart } from 'contexts/cart-context';
 import { useUserContext } from 'contexts/user-context/UserContext';
-import axios from 'axios';
+import apiClient from 'utils/apiClient';
 import * as S from './style';
 
 interface IProps {
@@ -24,18 +24,11 @@ const CartProduct = ({ product }: IProps) => {
   const handleRemoveProduct = async () => {
     try {
       // Call the DELETE API to remove the product
-      await axios.delete(
-        `${process.env.REACT_APP_API_GATEWAY_ORIGIN}/carts`,
-        {
-          headers: {
-            Authorization: `Bearer ${tokenId}`,
-            'Content-Type': 'application/json'
-          },
-          data: {
-            product_id: product_id
-          }
+      await apiClient.delete('/carts', {
+        data: {
+          product_id: product_id
         }
-      );
+      });
       
       // Remove product from local state
       removeProduct(product);
@@ -49,19 +42,10 @@ const CartProduct = ({ product }: IProps) => {
   const handleIncreaseProductQuantity = async () => {
     try {
       // Call the PUT API to update quantity
-      await axios.put(
-        `${process.env.REACT_APP_API_GATEWAY_ORIGIN}/carts`,
-        { 
-          product_id: product_id,
-          new_quantity: quantity + 1 
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${tokenId}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      await apiClient.put('/carts', { 
+        product_id: product_id,
+        new_quantity: quantity + 1 
+      });
       
       // Update product in local state
       increaseProductQuantity(product);
@@ -77,19 +61,10 @@ const CartProduct = ({ product }: IProps) => {
     
     try {
       // Call the PUT API to update quantity
-      await axios.put(
-        `${process.env.REACT_APP_API_GATEWAY_ORIGIN}/carts`,
-        { 
-          product_id: product_id,
-          new_quantity: quantity - 1 
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${tokenId}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      await apiClient.put('/carts', { 
+        product_id: product_id,
+        new_quantity: quantity - 1 
+      });
       
       // Update product in local state
       decreaseProductQuantity(product);
