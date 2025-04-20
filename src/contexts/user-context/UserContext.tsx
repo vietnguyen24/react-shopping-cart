@@ -15,11 +15,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const setTokenId = (newTokenId: string | null) => {
     setTokenIdState(newTokenId);
-    // if (newTokenId) {
-    //   localStorage.setItem('tokenId', newTokenId); // Save to localStorage
-    // } else {
-    //   localStorage.removeItem('tokenId'); // Remove from localStorage
-    // }
+    if (newTokenId) {
+      localStorage.setItem('id_token', newTokenId); // Save to localStorage
+    } else {
+      localStorage.removeItem('id_token'); // Remove from localStorage
+    }
   };
 
   return (
@@ -36,3 +36,5 @@ export const useUserContext = () => {
   }
   return context;
 };
+
+export default UserContext;

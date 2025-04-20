@@ -7,11 +7,11 @@ import { theme } from 'commons/style/theme';
 import GlobalStyle from 'commons/style/global-style';
 
 /* Context Providers */
+import { UserProvider } from 'contexts/user-context/UserContext';
 import { ProductsProvider } from 'contexts/products-context';
 import { CartProvider } from 'contexts/cart-context';
 
 import App from 'components/App';
-import { UserProvider } from 'contexts/user-context/UserContext';
 
 const root = document.getElementById('root')!;
 const container = ReactDOMClient.createRoot(root);
@@ -20,13 +20,13 @@ container.render(
   <StrictMode>
     <ThemeProvider theme={theme}>
       <GlobalStyle />
-      <ProductsProvider>
-        <CartProvider>
-          <UserProvider>
-          <App />
-          </UserProvider>
-        </CartProvider>
-      </ProductsProvider>
+      <UserProvider>
+        <ProductsProvider>
+          <CartProvider>
+            <App />
+          </CartProvider>
+        </ProductsProvider>
+      </UserProvider>
     </ThemeProvider>
   </StrictMode>
 );

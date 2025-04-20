@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import formatPrice from 'utils/formatPrice';
 import CartProducts from './CartProducts';
 import Loader from 'components/Loader';
@@ -30,10 +30,21 @@ const Cart = () => {
   }
   const { isLoading, error, fetchCartItems } = useCartContext();
 
-  // Fetch cart items when cart is opened or tokenId changes
+  // We'll use a ref to track if we need a manual fetch
+  const needsManualFetch = useRef(false);
+  
+  // Only fetch if the hasLoadedData flag in CartContextProvider wasn't able to handle it
+  // This provides a backup fetch mechanism if needed (e.g., after error conditions or special cases)
   useEffect(() => {
-    if (isOpen && tokenId) {
+    // Only consider fetching if the cart is open and we have a token
+    if (isOpen && tokenId && needsManualFetch.current) {
       fetchCartItems();
+      needsManualFetch.current = false;
+    }
+    
+    // Reset the flag when the cart is closed
+    if (!isOpen) {
+      needsManualFetch.current = true;
     }
   }, [isOpen, tokenId, fetchCartItems]);
 
