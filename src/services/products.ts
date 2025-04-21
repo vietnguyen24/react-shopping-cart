@@ -1,24 +1,43 @@
 import axios from 'axios';
 import { IGetProductsResponse } from 'models';
 
-
-export const getProducts = async (categories:string[] = []) => {
+export const getProducts = async (categories: string[] = [], searchTerm?: string) => {
   try {
-    const res = await axios.get(`${process.env.REACT_APP_API_GATEWAY_ORIGIN}/products/${generateParams(categories)}`)
-    console.log("products:", res.data.body)
-    return res.data.body
+    // Build the query params
+    const params = new URLSearchParams();
+    
+    if (categories.length > 0) {
+      params.append('category', categories.join(','));
+    }
+    
+    if (searchTerm) {
+      params.append('search', searchTerm);
+    }
+    
+    const queryString = params.toString();
+    const url = `${process.env.REACT_APP_API_GATEWAY_ORIGIN}/products${queryString ? `?${queryString}` : ''}`;
+    
+    const res = await axios.get(url);
+    console.log("products:", res.data.body);
+    return res.data.body;
   } catch(err) {
-    console.log(err)
-    return []
+    console.log(err);
+    return [];
   }
-}
+};
 
-
-const generateParams = (categories:string[]) => {
-  if (categories.length === 0){
-    return ""
-  }
-  return `?category=${categories.join(',')}`
+export const generateParams = (categories: string[], searchTerm?: string) => {
+  const params = new URLSearchParams();
   
-}
+  if (categories.length > 0) {
+    params.append('category', categories.join(','));
+  }
+  
+  if (searchTerm) {
+    params.append('search', searchTerm);
+  }
+  
+  const queryString = params.toString();
+  return queryString ? `?${queryString}` : '';
+};
 
