@@ -12,7 +12,7 @@ const Filter = () => {
     (async () => {
       try {
         const res = await axios.get(`${process.env.REACT_APP_API_GATEWAY_ORIGIN}/products/categories`)
-        setCategories(res.data.body)
+        setCategories(res.data)
       } catch (err) {
         console.log(err)
       }

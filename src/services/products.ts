@@ -5,8 +5,8 @@ import { IGetProductsResponse } from 'models';
 export const getProducts = async (categories:string[] = []) => {
   try {
     const res = await axios.get(`${process.env.REACT_APP_API_GATEWAY_ORIGIN}/products/${generateParams(categories)}`)
-    console.log("products:", res.data.body)
-    return res.data.body
+    console.log("products:", res)
+    return res.data
   } catch(err) {
     console.log(err)
     return []
