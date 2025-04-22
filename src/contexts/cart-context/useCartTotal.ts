@@ -18,19 +18,11 @@ const useCartTotal = () => {
       return sum;
     }, 0);
 
-    const installments = products.reduce(
-      (greater: number, product: ICartProduct) => {
-        greater =
-          product.installments > greater ? product.installments : greater;
-        return greater;
-      },
-      0
-    );
 
     const total = {
       productQuantity,
-      installments,
       totalPrice,
+      installments: 0, // Assuming you want to set this to 0 for now
       currencyId: 'USD',
       currencyFormat: '$',
     };

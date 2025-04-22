@@ -1,54 +1,108 @@
 import formatPrice from 'utils/formatPrice';
 import { ICartProduct } from 'models';
-
 import { useCart } from 'contexts/cart-context';
-
+import { useUserContext } from 'contexts/user-context/UserContext';
+import apiClient from 'utils/apiClient';
 import * as S from './style';
 
 interface IProps {
   product: ICartProduct;
 }
+
 const CartProduct = ({ product }: IProps) => {
-  const { removeProduct, increaseProductQuantity, decreaseProductQuantity } =
-    useCart();
+  const { removeProduct, increaseProductQuantity, decreaseProductQuantity } = useCart();
+  const { tokenId } = useUserContext();
+  
   const {
-    sku,
-    title,
+    product_id,
+    name,
     price,
-    style,
-    currencyId,
-    currencyFormat,
-    availableSizes,
     quantity,
+    image
   } = product;
 
-  const handleRemoveProduct = () => removeProduct(product);
-  const handleIncreaseProductQuantity = () => increaseProductQuantity(product);
-  const handleDecreaseProductQuantity = () => decreaseProductQuantity(product);
+  const handleRemoveProduct = async () => {
+    try {
+      // Call the DELETE API to remove the product
+      await apiClient.delete('/carts', {
+        data: {
+          product_id: product_id
+        }
+      });
+      
+      // Remove product from local state
+      removeProduct(product);
+    } catch (error) {
+      console.error('Error removing product:', error);
+      // Fall back to local state update if API fails
+      removeProduct(product);
+    }
+  };
 
-  return (
+  const handleIncreaseProductQuantity = async () => {
+    try {
+      // Call the PUT API to update quantity
+      await apiClient.put('/carts', { 
+        product_id: product_id,
+        new_quantity: quantity + 1 
+      });
+      
+      // Update product in local state
+      increaseProductQuantity(product);
+    } catch (error) {
+      console.error('Error increasing quantity:', error);
+      // Fall back to local state update if API fails
+      increaseProductQuantity(product);
+    }
+  };
+
+  const handleDecreaseProductQuantity = async () => {
+    if (quantity <= 1) return;
+    
+    try {
+      // Call the PUT API to update quantity
+      await apiClient.put('/carts', { 
+        product_id: product_id,
+        new_quantity: quantity - 1 
+      });
+      
+      // Update product in local state
+      decreaseProductQuantity(product);
+    } catch (error) {
+      console.error('Error decreasing quantity:', error);
+      // Fall back to local state update if API fails
+      decreaseProductQuantity(product);
+    }
+  };
+
+  // Use image from API if available, otherwise fall back to local image
+  const productImage = `${process.env.REACT_APP_IMAGE_ORIGIN}/${image}` || `${process.env.REACT_APP_IMAGE_ORIGIN}/${product_id}-1-cart.webp`;
+    return (
     <S.Container>
       <S.DeleteButton
         onClick={handleRemoveProduct}
         title="remove product from cart"
       />
       <S.Image
-        src={require(`static/products/${sku}-1-cart.webp`)}
-        alt={title}
+        src={productImage}
+        alt={name}
+        // onError={(e) => {
+        //   // If the API image fails to load, fall back to local image
+        //   e.currentTarget.src = `${process.env.REACT_APP_IMAGE_ORIGIN}/1-cart.webp`;
+        // }}
       />
       <S.Details>
-        <S.Title>{title}</S.Title>
+        <S.Title>{name}</S.Title>
         <S.Desc>
-          {`${availableSizes[0]} | ${style}`} <br />
           Quantity: {quantity}
         </S.Desc>
       </S.Details>
       <S.Price>
-        <p>{`${currencyFormat}  ${formatPrice(price, currencyId)}`}</p>
+        <p>{formatPrice(price, 'USD')}</p>
         <div>
           <S.ChangeQuantity
             onClick={handleDecreaseProductQuantity}
-            disabled={quantity === 1 ? true : false}
+            disabled={quantity <= 1}
           >
             -
           </S.ChangeQuantity>

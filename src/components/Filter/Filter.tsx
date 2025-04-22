@@ -1,11 +1,23 @@
 import { useProducts } from 'contexts/products-context';
 
 import * as S from './style';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
-export const availableSizes = ['XS', 'S', 'M', 'ML', 'L', 'XL', 'XXL'];
 
 const Filter = () => {
   const { filters, filterProducts } = useProducts();
+  const [categories, setCategories] = useState<string[]>([])
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await axios.get(`${process.env.REACT_APP_API_GATEWAY_ORIGIN}/products/categories`)
+        setCategories(res.data.body)
+      } catch (err) {
+        console.log(err)
+      }
+    })()
+  }, [])
 
   const selectedCheckboxes = new Set(filters);
 
@@ -17,7 +29,6 @@ const Filter = () => {
     }
 
     const filters = Array.from(selectedCheckboxes) as [];
-
     filterProducts(filters);
   };
 
@@ -25,11 +36,11 @@ const Filter = () => {
     <S.Checkbox label={label} handleOnChange={toggleCheckbox} key={label} />
   );
 
-  const createCheckboxes = () => availableSizes.map(createCheckbox);
+  const createCheckboxes = () => categories? categories.map(createCheckbox): '';
 
   return (
     <S.Container>
-      <S.Title>Sizes:</S.Title>
+      <S.Title>Categories:</S.Title>
       {createCheckboxes()}
     </S.Container>
   );
